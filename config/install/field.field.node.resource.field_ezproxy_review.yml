@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_ezproxy_review
+    - node.type.resource
+id: node.resource.field_ezproxy_review
+field_name: field_ezproxy_review
+entity_type: node
+bundle: resource
+label: 'Needs Review'
+description: 'Whether this stanza should be compared against the stanza automatically imported from OCLC. If you reviewed, and approve of, the stanza provided you should uncheck this box.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean

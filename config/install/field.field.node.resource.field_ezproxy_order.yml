@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_ezproxy_order
+    - node.type.resource
+  module:
+    - weight
+id: node.resource.field_ezproxy_order
+field_name: field_ezproxy_order
+entity_type: node
+bundle: resource
+label: Order
+description: 'The stanza list is by default sorted by title. If you need a stanza to come before/after certain stanzas, and alphabetical sorting doesn''t resolve it, you can use this field to pin stanzas to the top of your config.txt by using a smaller value, or to put them at the bottom with a larger value. Default value is zero.'
+required: false
+translatable: false
+default_value:
+  -
+    value: '0'
+default_value_callback: ''
+settings:
+  range: '20'
+field_type: weight

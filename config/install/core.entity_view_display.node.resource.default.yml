@@ -1,0 +1,60 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.resource.body
+    - field.field.node.resource.field_ezproxy_order
+    - field.field.node.resource.field_ezproxy_review
+    - field.field.node.resource.field_ezproxy_stanza
+    - field.field.node.resource.field_ezproxy_url
+    - node.type.resource
+  module:
+    - link
+    - text
+    - user
+id: node.resource.default
+targetEntityType: node
+bundle: resource
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 101
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  field_ezproxy_review:
+    weight: 106
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_ezproxy_stanza:
+    weight: 103
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_ezproxy_url:
+    weight: 105
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+    region: content
+  links:
+    weight: 100
+    region: content
+hidden:
+  field_ezproxy_order: true
