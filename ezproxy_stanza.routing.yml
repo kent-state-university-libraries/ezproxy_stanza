@@ -1,0 +1,42 @@
+ezproxy_stanza.canonical:
+  path: '/admin/content/ezproxy/overview'
+  defaults:
+    _controller: '\Drupal\ezproxy_stanza\Controller\EZProxyStanza::display'
+    _title: 'EZProxy'
+  requirements:
+    _permission: 'administer ezproxy server'
+ezproxy_stanza.settings:
+  path: '/admin/content/ezproxy/settings'
+  defaults:
+    _form: '\Drupal\ezproxy_stanza\Form\EZProxyStanzaSettingsForm'
+    _title: 'Settings'
+  requirements:
+    _permission: 'administer ezproxy server'
+ezproxy_stanza.download_config:
+  path: '/admin/content/ezproxy/download'
+  defaults:
+    _controller: '\Drupal\ezproxy_stanza\Controller\EZProxyStanza::download'
+    _title: 'EZProxy'
+  requirements:
+    _permission: 'administer ezproxy server'
+ezproxy_stanza.edit_config:
+  path: '/admin/content/ezproxy/edit'
+  defaults:
+    _form: '\Drupal\ezproxy_stanza\Form\EZProxyStanzaConfigEditForm'
+    _title: 'Edit config.txt'
+  requirements:
+    _permission: 'administer ezproxy server'
+ezproxy_stanza.update_config:
+  path: '/admin/content/ezproxy/update'
+  defaults:
+    _controller: '\Drupal\ezproxy_stanza\Controller\EZProxyStanza::update'
+    _title: 'EZProxy Update'
+  requirements:
+    _permission: 'administer ezproxy server'
+ezproxy_stanza.pull_config:
+  path: '/admin/content/ezproxy/pull'
+  defaults:
+    _controller: '\Drupal\ezproxy_stanza\Controller\EZProxyStanza::pull'
+    _title: 'EZProxy Pull'
+  requirements:
+    _permission: 'administer ezproxy server'

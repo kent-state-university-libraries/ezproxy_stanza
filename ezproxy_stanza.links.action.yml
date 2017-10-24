@@ -1,0 +1,17 @@
+ezproxy_stanza.add_stanza_action:
+  route_name: node.add
+  route_parameters:
+    node_type: 'resource'
+  title: 'Add a stanza'
+  appears_on:
+    - view.ezproxy_stanzas.page_1
+ezproxy_stanza.download_config:
+  route_name: ezproxy_stanza.download_config
+  title: 'View config.txt'
+  appears_on:
+    - view.ezproxy_stanzas.page_1
+ezproxy_stanza.edit_config:
+  route_name: ezproxy_stanza.edit_config
+  title: 'Edit config.txt'
+  appears_on:
+    - view.ezproxy_stanzas.page_1

@@ -1,0 +1,19 @@
+ezproxy_stanza.canonical:
+  title: EZProxy
+  route_name: ezproxy_stanza.canonical
+  base_route: system.admin_content
+
+ezproxy_stanza.config:
+  title: Manage
+  route_name: view.ezproxy_stanzas.page_1
+  parent_id: ezproxy_stanza.canonical
+
+ezproxy_stanza.overview:
+  title: Overview
+  route_name: ezproxy_stanza.canonical
+  parent_id: ezproxy_stanza.canonical
+
+ezproxy_stanza.settings:
+  title: 'Settings'
+  route_name: ezproxy_stanza.settings
+  parent_id: ezproxy_stanza.canonical

@@ -1,0 +1,4 @@
+ezproxy_stanza.admin:
+  title: EZProxy
+  route_name: view.ezproxy_stanzas.page_1
+  parent: system.admin_content

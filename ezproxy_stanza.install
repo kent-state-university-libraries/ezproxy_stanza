@@ -1,0 +1,96 @@
+<?php
+
+use Drupal\node\Entity\Node;
+use GitWrapper\GitWrapper;
+
+/**
+ * Implements hook_requirements().
+ */
+function ezproxy_stanza_requirements($phase) {
+  $requirements = [];
+  if ($phase == 'install') {
+    $path = 'private://ezproxy_stanza';
+    $priv_path = $path . DIRECTORY_SEPARATOR . 'priv';
+    if (!file_prepare_directory($path, FILE_CREATE_DIRECTORY) ||
+      !file_prepare_directory($priv_path, FILE_CREATE_DIRECTORY)) {
+      $requirements['repo_creation'] = [
+        'description' => t("Failed to create the necessary directory. Please check that your private filesystem is configured correctly."),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+
+    if (!class_exists('\GitWrapper\GitWrapper')) {
+      $requirements['vendor'] = [
+        'description' => t("EZProxy Stanza requires cpliakas/git-wrapper."),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function ezproxy_stanza_install() {
+  $git = new GitWrapper();
+
+  $remote = 'https://github.com/kent-state-university-libraries/oclc-ezproxy-database-stanzas';
+
+  $path = \Drupal::service('file_system')->realpath('private://ezproxy_stanza');
+
+  // clone the OCLC stanzas repo
+  $git->cloneRepository($remote, $path . DIRECTORY_SEPARATOR . 'public');
+  // create a local/private repo to store site's EZProxy config.txt
+  $git->init($path . DIRECTORY_SEPARATOR . 'priv');
+
+  // get the path to the OCLC repo's directory where the stanzas are stored
+  $stanzas_repo_path = $path . DIRECTORY_SEPARATOR . 'public'. DIRECTORY_SEPARATOR .'stanzas';
+  $stanza_dirs = scandir($stanzas_repo_path);
+  foreach ($stanza_dirs as $stanza_dir) {
+    if ($stanza_dir === '.' || $stanza_dir === '..') {
+      continue;
+    }
+
+    $oclc_stanza_dir = $stanzas_repo_path . DIRECTORY_SEPARATOR . $stanza_dir;
+    $stanza_file = $oclc_stanza_dir . DIRECTORY_SEPARATOR . 'stanza.txt';
+    $stanza = file_get_contents($stanza_file);
+    $lines = explode("\n", $stanza);
+    $title = FALSE;
+    foreach ($lines as $line) {
+      $spaces = explode(' ', trim($line));
+      $start = array_shift($spaces);
+      $start = strtolower($start);
+      if ($start === 't' || $start === 'title'
+        || substr($start, 0, 1) === 't' || substr($start, 0, 5) === 'title') {
+        $title = implode(' ', $spaces);
+        if (substr($title, 0, 6) === '-hide ') {
+          $title = substr($title, 7);
+        }
+        break;
+      }
+    }
+    if (!$title) {
+      $title = ucfirst($stanza_dir);
+    }
+
+    $node = Node::create([
+      'title' => $title,
+      'type' => 'resource',
+      'status' => NODE_NOT_PUBLISHED,
+    ]);
+    $node->set('field_ezproxy_url', 'https://www.oclc.org/support/services/ezproxy/documentation/db/'.$stanza_dir.'.en.html');
+
+    $node->set('field_ezproxy_stanza', $stanza);
+    $node->set('field_ezproxy_review', file_exists($oclc_stanza_dir . DIRECTORY_SEPARATOR . 'README.md'));
+    $node->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ezproxy_stanza_uninstall() {
+  //file_unmanaged_delete_recursive('private://ezproxy_stanza');
+}

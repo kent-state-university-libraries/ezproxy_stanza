@@ -1,0 +1,10 @@
+config-ui:
+  version: 1.0
+  js:
+    js/config.js: {}
+  css:
+    base:
+      css/config.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
