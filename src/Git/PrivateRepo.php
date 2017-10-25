@@ -102,7 +102,6 @@ class PrivateRepo extends Git {
   }
 
   public function updateRemote($msg = 'Update config.txt') {
-    $this->setEnvVar('GIT_COMMITTER_EMAIL', \Drupal::currentUser()->getEmail());
     $this->_writePrivateKey();
     parent::updateRemote($msg);
   }

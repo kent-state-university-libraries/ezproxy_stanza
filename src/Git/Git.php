@@ -37,6 +37,9 @@ class Git extends GitWrapper {
   }
 
   public function updateRemote($msg = 'Update config.txt') {
+    $email = \Drupal::currentUser()->getEmail();
+    $this->setEnvVar('GIT_COMMITTER_EMAIL', $email);
+    $this->setEnvVar('GIT_AUTHOR_EMAIL', $email);
     $this->git->commit('config.txt', array('m' => $msg));
     $this->git->push('origin', 'master');
   }
