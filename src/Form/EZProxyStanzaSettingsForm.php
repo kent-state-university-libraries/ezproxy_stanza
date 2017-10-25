@@ -8,6 +8,8 @@ use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\ezproxy_stanza\Git\PrivateRepo;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 
 class EZProxyStanzaSettingsForm extends FormBase {
 
@@ -51,6 +53,19 @@ class EZProxyStanzaSettingsForm extends FormBase {
       '#type' => 'textfield',
       '#title' => $this->t('URL to config.txt repository'),
       '#default_value' => isset($settings['priv']['origin']) ? $settings['priv']['origin'] : '',
+    ];
+
+    $description = 'Many git repository management systems, such as GitLab and GitHub, offer web hooks when actions are performed on a repository.<br>';
+    $description .= 'If your local repository is hosted in such a management system, you can add a webhook whenever the repository is pushed to to access this URL:<br>';
+    $url = Url::fromRoute('ezproxy_stanza.pull_config', [], ['absolute' => TRUE]);
+    $description .= Link::fromTextandUrl($url->toString(), $url)->toString();
+    $description .= '<br><br><strong>Not configuring this has a performance impact</strong>. This will keep your local repository up to date with changes made outside of this system.<br>';
+    $description .= 'If you don\'t configure this, every time you perform an action your system will need to check in with your remote repository to ensure it is up to date';
+    $form['priv']['auto_update'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Local repository is automatically updated from remote'),
+      '#description' => $this->t($description),
+      '#default_value' => !empty($settings['priv']['auto_update']),
     ];
 
     $form['authentication'] = [
@@ -121,11 +136,17 @@ class EZProxyStanzaSettingsForm extends FormBase {
     foreach ($keys as $key) {
       $ezproxy_stanza_settings[$key] = $form_state->getValue($key);
     }
-
+    $old_settings = \Drupal::state()->get('ezproxy_stanza_settings');
     \Drupal::state()->set('ezproxy_stanza_settings', $ezproxy_stanza_settings);
 
-    $git = new PrivateRepo();
-    $git->updateOrigin($ezproxy_stanza_settings['priv']['origin']);
-    $git->pullRemote();
+    if (!isset($old_settings['priv']['origin']) || $old_settings['priv']['origin'] !== $ezproxy_stanza_settings['priv']['origin']) {
+      $git = new PrivateRepo();
+      $git->updateOrigin($ezproxy_stanza_settings['priv']['origin']);
+      $git->pullRemote();
+    }
+
+    drupal_set_message($this->t('Your changes have been saved.'));
+
+    $form_state->setRedirect('view.ezproxy_stanzas.page_1');
   }
 }

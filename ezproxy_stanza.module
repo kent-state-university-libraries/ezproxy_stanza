@@ -139,9 +139,9 @@ function ezproxy_stanza_cron() {
         // don't send to super admin unless that's the only person receiving the email
         // hopefully uid 1 isn't being used
         // @todo should this be a setting?
-        if (isset($emails[1]) && count($emails) > 1) {
-          unset($emails[1]);
-        }
+        // if (isset($emails[1]) && count($emails) > 1) {
+        //   unset($emails[1]);
+        // }
         $options = [
           'absolute' => TRUE,
           'query' => ['review' => 0]
