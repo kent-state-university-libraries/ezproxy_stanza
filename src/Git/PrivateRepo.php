@@ -6,13 +6,10 @@ use Drupal\ezproxy_stanza\Git\Git;
 
 class PrivateRepo extends Git {
   private $private_key_path;
-  private $ezproxy_settings;
 
   public function __construct() {
-    parent::__construct(EZPROXY_STANZA_REPO_PRIV);
+    parent::__construct(EZPROXY_STANZA_REPO_PRIV, 'priv');
     $this->private_key_path = $this->_get_priv_key_path();
-    $settings = \Drupal::state()->get('ezproxy_stanza_settings');
-    $this->ezproxy_settings = $settings['priv'];
   }
 
   public function __destruct() {
@@ -23,26 +20,13 @@ class PrivateRepo extends Git {
     }
   }
 
-  public function getTopConfig() {
-
-    if (empty($this->ezproxy_settings['auto_update'])) {
-      $this->pullRemote();
+  public function setFileContents($file, $contents) {
+    if ($file === 'config.txt') {
+      $this->setConfig($contents);
     }
-
-    $f = fopen($this->getDirectory() . DIRECTORY_SEPARATOR . 'config.txt', 'r');
-    $return = [];
-    while ($line = fgets($f)) {
-      $line = trim($line);
-      if ($line === EZPROXY_STANZA_CONFIG_TERMINATOR) {
-        break;
-      }
-
-      $return[] = $line;
+    else {
+      parent::setFileContents($file, $contents);
     }
-
-    fclose($f);
-
-    return $return;
   }
 
   public function setConfig($top_config = FALSE) {
@@ -50,7 +34,7 @@ class PrivateRepo extends Git {
       $top_config = explode("\n", $top_config);
     }
     elseif (!$top_config) {
-      $top_config = $this->getTopConfig();
+      $top_config = $this->getFileContents('config.txt');
     }
 
     while (trim(end($top_config)) === '') {
@@ -101,9 +85,9 @@ class PrivateRepo extends Git {
     parent::pullRemote();
   }
 
-  public function updateRemote($msg = 'Update config.txt') {
+  public function updateRemote($msg = 'Update config.txt', $file = 'config.txt') {
     $this->_writePrivateKey();
-    parent::updateRemote($msg);
+    parent::updateRemote($msg, $file);
   }
 
   private function _get_priv_key_path() {

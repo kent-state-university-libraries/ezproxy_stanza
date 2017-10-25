@@ -8,9 +8,9 @@ ezproxy_stanza.config:
   route_name: view.ezproxy_stanzas.page_1
   parent_id: ezproxy_stanza.canonical
 
-ezproxy_stanza.overview:
-  title: Overview
-  route_name: ezproxy_stanza.canonical
+ezproxy_stanza.edit_config:
+  title: 'Edit config files'
+  route_name: ezproxy_stanza.edit_config
   parent_id: ezproxy_stanza.canonical
 
 ezproxy_stanza.settings:

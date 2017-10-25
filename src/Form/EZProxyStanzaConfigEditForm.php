@@ -25,20 +25,43 @@ class EZProxyStanzaConfigEditForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $repo = new PrivateRepo();
-    $top_config = $repo->getTopConfig();
-    $form['config'] = [
-      '#type' => 'textarea',
-      '#title' => 'config.txt',
+    foreach (scandir($repo->getDirectory()) as $file) {
+      if (in_array($file, ['.', '..', '.git'])) {
+        continue;
+      }
+      $files[$file] = $file;
+    }
+
+    $open_file = $form_state->getValue('file');
+    $form['file'] = [
+      '#type' => 'select',
+      '#title' => $this->t('File'),
+      '#options' => $files,
       '#required' => TRUE,
-      '#rows' => max(10, count($top_config) + 1),
-      '#default_value' => implode("\n", $top_config)
+      '#default_value' => $open_file,
+      '#disabled' => $open_file,
     ];
+    if ($open_file) {
+      $contents = $repo->getFileContents($open_file);
+      $form['contents'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Contents'),
+        '#rows' => max(10, count($contents) + 1),
+        '#default_value' => implode("\n", $contents)
+      ];
+      $form['commit_msg'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Commit message (optional)'),
+        '#default_value' => 'Update ' . $open_file,
+      ];
+    }
+
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Save'),
+      '#value' => $open_file ? $this->t('Save') : $this->t('Edit'),
       '#button_type' => 'primary',
-      '#suffix' => Link::fromTextandUrl($this->t('Cancel'), Url::fromRoute('view.ezproxy_stanzas.page_1'))->toString(),
+      '#suffix' => $open_file ? Link::fromTextandUrl($this->t('Close'), Url::fromRoute('ezproxy_stanza.edit_config'))->toString() : '',
     ];
 
     return $form;
@@ -53,20 +76,25 @@ class EZProxyStanzaConfigEditForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $form_state->getValue('config');
-
     $repo = new PrivateRepo();
-    $repo->setConfig($config);
-
-    // if something was edited, commit the changes
-    if ($repo->hasChanges()) {
-      $repo->updateRemote();
-      drupal_set_message('Your changes have been saved.');
+    if ($form_state->getValue('op')->__toString() == $this->t('Edit')->__toString()) {
+      $form_state->setRebuild();
     }
     else {
-      drupal_set_message('No changes detected.');
-    }
+      $contents = $form_state->getValue('contents');
+      $file = $form_state->getValue('file');
 
-    $form_state->setRedirect('view.ezproxy_stanzas.page_1');
+      $repo->setFileContents($file, $contents);
+
+      // if something was edited, commit the changes
+      if ($repo->hasChanges()) {
+        $commit_msg = $form_state->getValue('commit_msg');
+        $repo->updateRemote($commit_msg, $file);
+        drupal_set_message('Your changes have been saved.');
+      }
+      else {
+        drupal_set_message('No changes detected.');
+      }
+    }
   }
 }
