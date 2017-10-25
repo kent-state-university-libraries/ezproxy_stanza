@@ -39,4 +39,4 @@ ezproxy_stanza.pull_config:
     _controller: '\Drupal\ezproxy_stanza\Controller\EZProxyStanza::pull'
     _title: 'EZProxy Pull'
   requirements:
-    _permission: 'administer ezproxy server'
+    _access: 'TRUE'

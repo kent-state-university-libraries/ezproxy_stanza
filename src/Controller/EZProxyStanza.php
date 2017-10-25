@@ -5,6 +5,7 @@ namespace Drupal\ezproxy_stanza\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\ezproxy_stanza\Git\PublicRepo;
 use Drupal\ezproxy_stanza\Git\PrivateRepo;
@@ -63,11 +64,11 @@ class EZProxyStanza extends ControllerBase implements ContainerInjectionInterfac
   }
 
   public function pull() {
-    // @todo
-    $elements = [];
-    $elements[] = [
-      '#markup' => ''
-    ];
-    return $elements;
+    $repo = new PrivateRepo();
+    $repo->pullRemote();
+
+    $response = new Response('1');
+
+    return $response->setPrivate();
   }
 }
