@@ -5,35 +5,30 @@ namespace Drupal\ezproxy_stanza\Git;
 use Drupal\ezproxy_stanza\Git\Git;
 
 class PrivateRepo extends Git {
-  private $private_key_path = FALSE;
+  private $private_key_path;
+  private $ezproxy_settings;
 
   public function __construct() {
     parent::__construct(EZPROXY_STANZA_REPO_PRIV);
+    $this->private_key_path = $this->_get_priv_key_path();
     $settings = \Drupal::state()->get('ezproxy_stanza_settings');
-    if (!empty($settings['authentication']['ssh']['private_key'])) {
-      $this->private_key_path = $this->ezproxy_stanza_get_priv_key_path();
-      if (!file_exists($this->private_key_path)) {
-        $f = fopen($this->private_key_path, 'w');
-        if ($f) {
-          fwrite($f, $settings['authentication']['ssh']['private_key']);
-          fclose($f);
-          chmod($this->private_key_path, 0700);
-        }
-      }
-      $this->setPrivateKey($this->private_key_path);
-    }
+    $this->ezproxy_settings = $settings['priv'];
   }
 
   public function __destruct() {
     // remove the private key (if one exists)
-    if ($this->private_key_path) {
+    if (file_exists($this->private_key_path)) {
       $this->unsetPrivateKey();
       unlink($this->private_key_path);
     }
   }
 
   public function getTopConfig() {
-    $this->pullRemote();
+
+    if (empty($this->ezproxy_settings['auto_update'])) {
+      $this->pullRemote();
+    }
+
     $f = fopen($this->getDirectory() . DIRECTORY_SEPARATOR . 'config.txt', 'r');
     $return = [];
     while ($line = fgets($f)) {
@@ -73,7 +68,9 @@ class PrivateRepo extends Git {
       LEFT JOIN {node__field_ezproxy_order} o ON o.entity_id = n.nid
       ORDER BY IF(field_ezproxy_order_value, field_ezproxy_order_value, 0), n.title')->fetchCol();
 
-    $this->pullRemote();
+    if (empty($this->ezproxy_settings['auto_update'])) {
+      $this->pullRemote();
+    }
 
     $f = fopen($this->getDirectory() . DIRECTORY_SEPARATOR . 'config.txt', 'w');
     if ($f) {
@@ -98,10 +95,37 @@ class PrivateRepo extends Git {
       drupal_set_message('Could not create config.txt', 'error');
     }
   }
-  private function ezproxy_stanza_get_priv_key_path() {
+
+  public function pullRemote() {
+    $this->_writePrivateKey();
+    parent::pullRemote();
+  }
+
+  public function updateRemote($msg = 'Update config.txt') {
+    $this->_writePrivateKey();
+    parent::updateRemote($msg);
+  }
+
+  private function _get_priv_key_path() {
     $path = file_directory_temp();
     $path .= DIRECTORY_SEPARATOR . 'ezproxy_stanza_id_rsa';
 
     return $path;
+  }
+
+  private function _writePrivateKey() {
+    $settings = \Drupal::state()->get('ezproxy_stanza_settings');
+    if (!empty($settings['authentication']['ssh']['private_key'])) {
+      $this->private_key_path = $this->_get_priv_key_path();
+      if (!file_exists($this->private_key_path)) {
+        $f = fopen($this->private_key_path, 'w');
+        if ($f) {
+          fwrite($f, $settings['authentication']['ssh']['private_key']);
+          fclose($f);
+          chmod($this->private_key_path, 0700);
+        }
+      }
+      $this->setPrivateKey($this->private_key_path);
+    }
   }
 }
