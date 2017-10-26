@@ -131,7 +131,6 @@ function ezproxy_stanza_cron() {
       if (count($emails)) {
         $options = [
           'absolute' => TRUE,
-          'query' => ['review' => 1, 'status' => 1]
         ];
         $params = [
           'message' => 'New OCLC update at '
