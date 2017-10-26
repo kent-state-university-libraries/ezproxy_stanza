@@ -243,21 +243,21 @@ function ezproxy_stanza_process_config_view($form, FormStateInterface $form_stat
   $msg = '';
   if (count($published)) {
     drupal_set_message(t('Successfully added @titles to config.txt.', ['@titles' => implode(', ', $published)]));
-    $msg .= t('Added @titles to config.txt.', ['@titles' => implode(', ', $published)])->toString();
+    $msg .= t('Added @titles to config.txt.', ['@titles' => implode(', ', $published)])->__toString();
   }
   if (count($unpublished)) {
     drupal_set_message(t('Successfully removed @titles from config.txt.', ['@titles' => implode(', ', $unpublished)]));
     if (count($published)) {
       $msg .= ' ';
     }
-    $msg .= t('Removed @titles to config.txt.', ['@titles' => implode(', ', $unpublished)])->toString();
+    $msg .= t('Removed @titles to config.txt.', ['@titles' => implode(', ', $unpublished)])->__toString();
   }
 
   $repo = new PrivateRepo();
   $repo->setConfig();
   if ($repo->hasChanges()) {
     if (strlen($msg) == '') {
-      $msg = t('Update config.txt');
+      $msg = t('Update config.txt')->__toString();
     }
     $repo->updateRemote($msg);
     drupal_set_message(t('Deployed successfully.'));
