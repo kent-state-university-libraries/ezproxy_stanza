@@ -122,29 +122,16 @@ function ezproxy_stanza_cron() {
       $module = 'ezproxy_stanza';
       $key = 'oclc_update';
 
-      // get the email address for everyone that has permission to administer the EZProxy server
-      $emails = [];
-      $roles =  Role::loadMultiple();
-      foreach ($roles as $role_name => $role) {
-        if ($role->hasPermission('administer ezproxy server')) {
-          $emails += \Drupal::database()->query("SELECT u.uid, u.mail
-            FROM {users_field_data} u
-            INNER JOIN {user__roles} r ON r.bundle = 'user' AND r.entity_id = u.uid
-            WHERE r.roles_target_id = :target_id AND u.status = 1", [':target_id' => $role_name])->fetchAllKeyed();
-        }
-      }
-
+      // get the email address for everyone with the EZProxy Admin role
+      $emails = \Drupal::database()->query("SELECT u.uid, u.mail
+        FROM {users_field_data} u
+        INNER JOIN {user__roles} r ON r.bundle = 'user' AND r.entity_id = u.uid
+        WHERE r.roles_target_id = :target_id AND u.status = 1", [':target_id' => 'ezproxy_admin'])->fetchAllKeyed();
       // if we found someone to email, send the email
       if (count($emails)) {
-        // don't send to super admin unless that's the only person receiving the email
-        // hopefully uid 1 isn't being used
-        // @todo should this be a setting?
-        // if (isset($emails[1]) && count($emails) > 1) {
-        //   unset($emails[1]);
-        // }
         $options = [
           'absolute' => TRUE,
-          'query' => ['review' => 0]
+          'query' => ['review' => 1, 'status' => 1]
         ];
         $params = [
           'message' => 'New OCLC update at '

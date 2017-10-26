@@ -1,0 +1,10 @@
+uuid: 485ad9f3-8933-4eb8-9aef-aef4eaf0643d
+langcode: en
+status: true
+dependencies: {  }
+id: ezproxy_admin
+label: 'EZProxy Admin'
+weight: 4
+is_admin: null
+permissions:
+  - 'administer ezproxy server'
