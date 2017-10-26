@@ -52,15 +52,17 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['priv']['origin'] = [
       '#type' => 'textfield',
       '#title' => $this->t('URL to config.txt repository'),
+      '#attributes' => ['placeholder' => 'git@github.com:/repo/path'],
+      '#required' => TRUE,
       '#default_value' => isset($settings['priv']['origin']) ? $settings['priv']['origin'] : '',
     ];
 
     $description = 'Many git repository management systems, such as GitLab and GitHub, offer web hooks when actions are performed on a repository.<br>';
-    $description .= 'If your local repository is hosted in such a management system, you can add a webhook whenever the repository is pushed to to access this URL:<br>';
+    $description .= 'If your local repository is hosted in such a management system you should add a webhook whenever a push event is made in this repository to access this URL:<br>';
     $url = Url::fromRoute('ezproxy_stanza.pull_config', [], ['absolute' => TRUE]);
     $description .= Link::fromTextandUrl($url->toString(), $url)->toString();
-    $description .= '<br><br><strong>Not configuring this has a performance impact</strong>. This will keep your local repository up to date with changes made outside of this system.<br>';
-    $description .= 'If you don\'t configure this, every time you perform an action your system will need to check in with your remote repository to ensure it is up to date';
+    $description .= '<br><br><strong>Not configuring this has a performance impact</strong>. The webhook will keep your local repository up to date with changes made outside of this system.<br>';
+    $description .= 'If you don\'t configure this, every time you perform an action your system will need to check in with your remote repository to ensure it is up to date.';
     $form['priv']['auto_update'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Local repository is automatically updated from remote'),
@@ -79,7 +81,7 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['authentication']['ssh'] = [
       '#type' => 'details',
       '#title' => $this->t('SSH'),
-      '#description' => $this->t('Ideally this is the private key of a deploy key that only has access to your local repository.'),
+      '#description' => $this->t('Ideally this is the private key of a deploy key that only has access to your local repository. The account associated with this key needs write access to the repository.'),
       '#open' => TRUE, //!empty($settings['authentication']['ssh']['private_key']),
       '#tree' => TRUE,
     ];
