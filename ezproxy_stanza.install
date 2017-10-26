@@ -9,6 +9,14 @@ use GitWrapper\GitWrapper;
 function ezproxy_stanza_requirements($phase) {
   $requirements = [];
   if ($phase == 'install') {
+    // make sure git is installed
+    if (empty(shell_exec("which git 2>/dev/null"))) {
+      $requirements['git'] = [
+        'description' => t("Git version control software needs to be installed on your server."),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+
     $path = 'private://ezproxy_stanza';
     $priv_path = $path . DIRECTORY_SEPARATOR . 'priv';
     if (!file_prepare_directory($path, FILE_CREATE_DIRECTORY) ||
