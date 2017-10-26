@@ -8,3 +8,10 @@ config-ui:
   dependencies:
     - core/jquery
     - core/drupal
+config-edit:
+  version: 1.0
+  js:
+    js/edit.js: {}
+  css:
+    base:
+      css/edit.css: {}

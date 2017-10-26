@@ -41,6 +41,10 @@ class EZProxyStanzaConfigEditForm extends FormBase {
       '#default_value' => $open_file,
       '#disabled' => $open_file,
     ];
+    $form['edit'] = [
+      '#type' => 'submit',
+      '#value' => $open_file ? $this->t('Close') : $this->t('Edit'),
+    ];
     if ($open_file) {
       $contents = $repo->getFileContents($open_file);
       $form['contents'] = [
@@ -54,16 +58,29 @@ class EZProxyStanzaConfigEditForm extends FormBase {
         '#title' => $this->t('Commit message (optional)'),
         '#default_value' => 'Update ' . $open_file,
       ];
+
+      $form['actions']['#type'] = 'actions';
+      $form['actions']['deploy'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save and deploy'),
+        '#button_type' => 'danger',
+      ];
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save'),
+        '#button_type' => 'primary',
+      ];
+      $form['actions']['cancel'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Close'),
+      ];
     }
-
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $open_file ? $this->t('Save') : $this->t('Edit'),
-      '#button_type' => 'primary',
-      '#suffix' => $open_file ? Link::fromTextandUrl($this->t('Close'), Url::fromRoute('ezproxy_stanza.edit_config'))->toString() : '',
-    ];
-
+    else {
+      $form[] = [
+        '#markup' => '<p>' . $this->t('Select an EZProxy configuration file to edit') . '</p>'
+      ];
+    }
+    $form['#attached']['library'][] = 'ezproxy_stanza/config-edit';
     return $form;
   }
 
@@ -77,10 +94,11 @@ class EZProxyStanzaConfigEditForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $repo = new PrivateRepo();
-    if ($form_state->getValue('op')->__toString() == $this->t('Edit')->__toString()) {
+    $submit_button = $form_state->getValue('op')->__toString();
+    if ($submit_button === $this->t('Edit')->__toString()) {
       $form_state->setRebuild();
     }
-    else {
+    elseif ($submit_button !== $this->t('Close')->__toString()) {
       $contents = $form_state->getValue('contents');
       $file = $form_state->getValue('file');
 
@@ -88,8 +106,10 @@ class EZProxyStanzaConfigEditForm extends FormBase {
 
       // if something was edited, commit the changes
       if ($repo->hasChanges()) {
-        $commit_msg = $form_state->getValue('commit_msg');
-        $repo->updateRemote($commit_msg, $file);
+        if ($submit_button === $this->t('Save and deploy')->__toString()) {
+          $commit_msg = $form_state->getValue('commit_msg');
+          $repo->updateRemote($commit_msg, $file);
+        }
         drupal_set_message('Your changes have been saved.');
       }
       else {

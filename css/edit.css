@@ -1,0 +1,6 @@
+#ezproxy-stanza-config-edit-form .form-item-file {
+  display: inline;
+}
+#ezproxy-stanza-config-edit-form input[type="submit"][value="Edit"] {
+  display: none;
+}

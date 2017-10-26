@@ -49,7 +49,7 @@ class Git extends GitWrapper {
     return $contents;
   }
 
-  public function getFileContents($file) {
+  public function getFileContents($file, $full = FALSE) {
     if (empty($this->ezproxy_settings['auto_update'])) {
       $this->pullRemote();
     }
@@ -59,7 +59,7 @@ class Git extends GitWrapper {
     if ($f) {
       while ($line = fgets($f)) {
         $line = trim($line);
-        if ($line === EZPROXY_STANZA_CONFIG_TERMINATOR) {
+        if (!$full && $line === EZPROXY_STANZA_CONFIG_TERMINATOR) {
           break;
         }
 
