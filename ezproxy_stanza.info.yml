@@ -2,6 +2,7 @@ name: EZProxy Stanza
 description: Manage your EZProxy config files
 package: EZProxy
 type: module
+configure: ezproxy_stanza.settings
 core: 8.x
 dependencies:
   - field
