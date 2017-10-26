@@ -1,10 +1,12 @@
+
 .js-form-item-action,
 #edit-submit--2,
 .select-all.views-field.views-field-node-bulk-form input {
   display: none;
 }
 
-#views-exposed-form-ezproxy-stanzas-page-1 #edit-actions {
+#views-exposed-form-ezproxy-stanza-search-default div[data-drupal-selector="edit-actions"],
+#views-exposed-form-ezproxy-stanzas-page-1 div[data-drupal-selector="edit-actions"] {
   clear: none;
   float: left;
   margin-top: 2em;
