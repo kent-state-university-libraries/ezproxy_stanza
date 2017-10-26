@@ -104,12 +104,14 @@ class EZProxyStanzaConfigEditForm extends FormBase {
 
       $repo->setFileContents($file, $contents);
 
-      // if something was edited, commit the changes
+      // if something was edited
       if ($repo->hasChanges()) {
+        // commit the changes if they select to deploy
         if ($submit_button === $this->t('Save and deploy')->__toString()) {
           $commit_msg = $form_state->getValue('commit_msg');
           $repo->updateRemote($commit_msg, $file);
         }
+
         drupal_set_message('Your changes have been saved.');
       }
       else {

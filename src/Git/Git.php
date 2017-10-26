@@ -30,6 +30,10 @@ class Git extends GitWrapper {
     return rtrim($this->git->log(func_get_args())->getOutput());
   }
 
+  public function diff() {
+    return $this->git->diff(func_get_args());
+  }
+
   public function getDirectory() {
     return $this->git->getDirectory();
   }

@@ -193,24 +193,61 @@ function ezproxy_stanza_file_download($uri) {
  */
 function ezproxy_stanza_form_views_form_ezproxy_stanzas_page_1_alter(&$form, FormStateInterface $form_state, $form_id) {
 
-  // go through all the rows in the view
-  // if the node for that row is published, automatically check the box for that row
-  $published = [];
-  foreach ($form['output'][0]['#rows'] as $row_key => $row) {
-    $node = $row->_entity;
-    if ($node->status->value == NODE_PUBLISHED) {
-      $published[] = $node->id();
-      $form['node_bulk_form'][$row_key]['#default_value'] = $form['node_bulk_form'][$row_key]['#return_value'];
+  // only process once
+  if (!$form_state->get('ezproxy_stanza_processed')) {
+    $form_state->set('ezproxy_stanza_processed', 1);
+
+    // check if the repository has had any changes
+    $repo = new PrivateRepo();
+    if ($repo->hasChanges()) {
+
+      // if changes have been made, show the `git diff` as a fieldset
+      $form['diff'] = [
+        '#type' => 'fieldset',
+        '#title' => t('Pending changes'),
+        '#description' => '',
+        '#weight' => -100,
+      ];
+
+      $repo->diff();
+      $lines = explode("\n", $repo->getOutput());
+      foreach ($lines as $line) {
+        if (strlen($line) > 2) {
+          $first_chr = substr($line, 0, 1);
+          $second_chr = substr($line, 1, 1);
+
+
+          if ($first_chr === '-' && $second_chr !== '-') {
+            $line = '<span class="deleted">' . $line . '</span>';
+          }
+          elseif ($first_chr === '+' && $second_chr !== '+') {
+            $line = '<span class="added">' . $line . '</span>';
+          }
+        }
+
+        $form['diff']['#description'] .= $line . '<br>';
+      }
     }
+
+    // go through all the rows in the view
+    // if the node for that row is published, automatically check the box for that row
+    $published = [];
+    foreach ($form['output'][0]['#rows'] as $row_key => $row) {
+      $node = $row->_entity;
+      if ($node->status->value == NODE_PUBLISHED) {
+        $published[] = $node->id();
+        $form['node_bulk_form'][$row_key]['#default_value'] = $form['node_bulk_form'][$row_key]['#return_value'];
+      }
+    }
+
+    $form_state->set('ezproxy_stanza_published', $published);
+
+    $form['actions']['submit']['#value'] = t('Deploy');
+
+    $form['#attached']['library'][] = 'ezproxy_stanza/config-ui';
+
+    $form['#submit'][] = 'ezproxy_stanza_process_config_view';
   }
-
-  $form_state->set('ezproxy_stanza_published', $published);
-
-  $form['actions']['submit']['#value'] = t('Deploy');
-
-  $form['#attached']['library'][] = 'ezproxy_stanza/config-ui';
-
-  $form['#submit'][] = 'ezproxy_stanza_process_config_view';
 }
 
 function ezproxy_stanza_process_config_view($form, FormStateInterface $form_state) {
