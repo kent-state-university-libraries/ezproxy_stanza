@@ -53,7 +53,11 @@ function ezproxy_stanza_cron() {
       $stanza_file = EZPROXY_STANZA_REPO_PUBLIC . DIRECTORY_SEPARATOR . $files[$url];
       $readme_file = str_replace(DIRECTORY_SEPARATOR . 'stanza.txt', DIRECTORY_SEPARATOR . 'README.md', $stanza_file);
       $stanza = file_get_contents($stanza_file);
-      if ($stanza !== $node->field_ezproxy_stanza->value) {
+      // see when this file was last updated from git
+      $stanza_changed = filemtime($stanza_file);
+      // make sure the stanza indeed needs updated
+      // AND the node hasn't been updated already by an admin
+      if ($stanza !== $node->field_ezproxy_stanza->value && $node->changed->value < $stanza_changed) {
         if ($node->getRevisionUserId() != 0 || file_exists($readme_file)) {
           $node->set('field_ezproxy_review', TRUE);
         }
