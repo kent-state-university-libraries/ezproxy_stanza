@@ -253,7 +253,7 @@ function ezproxy_stanza_form_views_form_ezproxy_stanzas_page_1_alter(&$form, For
 
     $form['#attached']['library'][] = 'ezproxy_stanza/config-ui';
 
-    $form['#submit'] = ['ezproxy_stanza_process_config_view'];
+    $form['#submit'][] = 'ezproxy_stanza_process_config_view';
   }
 }
 
