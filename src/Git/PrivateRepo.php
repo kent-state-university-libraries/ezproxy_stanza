@@ -52,7 +52,7 @@ class PrivateRepo extends Git {
       LEFT JOIN {node__field_ezproxy_order} o ON o.entity_id = n.nid
       ORDER BY IF(field_ezproxy_order_value, field_ezproxy_order_value, 0), n.title')->fetchCol();
 
-    if (empty($this->ezproxy_settings['auto_update'])) {
+    if (!$this->autoUpdate()) {
       $this->pullRemote();
     }
 

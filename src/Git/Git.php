@@ -25,6 +25,10 @@ class Git extends GitWrapper {
     return rtrim($this->git->getOutput());
   }
 
+  public function autoUpdate() {
+    return !empty($this->ezproxy_settings['auto_update']);
+  }
+
   public function log() {
     $this->git->clearOutput();
     return rtrim($this->git->log(func_get_args())->getOutput());
@@ -34,12 +38,16 @@ class Git extends GitWrapper {
     return $this->git->diff(func_get_args());
   }
 
+  public function add($filepattern, $options = array()) {
+    return $this->git->add($filepattern, $options);
+  }
+
   public function getDirectory() {
     return $this->git->getDirectory();
   }
 
-  public function setFileContents($file, $contents) {
-    if (empty($this->ezproxy_settings['auto_update'])) {
+  public function setFileContents($file, $contents, $install = FALSE) {
+    if (!$install && empty($this->ezproxy_settings['auto_update'])) {
       $this->pullRemote();
     }
 

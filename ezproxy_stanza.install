@@ -2,6 +2,7 @@
 
 use Drupal\node\Entity\Node;
 use GitWrapper\GitWrapper;
+use Drupal\ezproxy_stanza\Git\PrivateRepo;
 
 /**
  * Implements hook_requirements().
@@ -94,11 +95,45 @@ function ezproxy_stanza_install() {
     $node->set('field_ezproxy_review', file_exists($oclc_stanza_dir . DIRECTORY_SEPARATOR . 'README.md'));
     $node->save();
   }
+
+  $private_repo = new PrivateRepo();
+
+  // create a .gitignore file
+  $gitignore = "audit/*\n";
+  $gitignore .= "cookies/*\n";
+  $gitignore .= "docs/*\n";
+  $gitignore .= "ezproxy\n";
+  $gitignore .= "ezproxy.hst\n";
+  $gitignore .= "ezproxy.ipc\n";
+  $gitignore .= "ezproxy.key\n";
+  $gitignore .= "ezproxy.log*\n";
+  $gitignore .= "ezproxy.rnd\n";
+  $gitignore .= "GeoLiteCity.dat*\n";
+  $gitignore .= "license.txt\n";
+  $gitignore .= "logrotate.sh\n";
+  $gitignore .= "messages.txt\n";
+  $gitignore .= "mimetype\n";
+  $gitignore .= "ServiceValidateURL\n";
+  $gitignore .= "ssl/*\n";
+  $gitignore .= "wskey.key\n";
+  $private_repo->setFileContents('.gitignore', $gitignore, 1);
+
+  // add a very basic config.txt
+  $config_txt = "# EZProxy Settings\n";
+  $config_txt .= "### DO NOT WRITE BELOW THIS LINE. IT WILL BE OVERWRITTEN.\n";
+  $private_repo->setFileContents('config.txt', $config_txt, 1);
+
+  // add the files
+  $private_repo->add('.');
+
+  // make the initial commit
+  $private_repo->commit('.', 'Initial commit.');
 }
 
 /**
  * Implements hook_uninstall().
  */
 function ezproxy_stanza_uninstall() {
-  //file_unmanaged_delete_recursive('private://ezproxy_stanza');
+  file_unmanaged_delete_recursive('private://ezproxy_stanza');
+  // @todo delete all nodes
 }
