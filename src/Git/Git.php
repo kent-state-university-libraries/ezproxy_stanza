@@ -78,17 +78,25 @@ class Git extends GitWrapper {
   }
 
   public function pullRemote() {
-    $this->git->fetchAll();
-    $this->git->checkout('master');
-    $this->git->pull('origin', 'master');
+    if ($this->git->hasRemote('origin')) {
+      $this->git->fetchAll();
+      $this->git->checkout('master');
+      $this->git->pull('origin', 'master');
+    }
   }
 
   public function updateRemote($msg = 'Update config.txt', $file = 'config.txt') {
     $email = \Drupal::currentUser()->getEmail();
     $this->setEnvVar('GIT_COMMITTER_EMAIL', $email);
     $this->setEnvVar('GIT_AUTHOR_EMAIL', $email);
+    $this->commit($file, $msg);
+    if ($this->git->hasRemote('origin')) {
+      $this->git->push('origin', 'master');
+    }
+  }
+
+  public function commit($file, $msg) {
     $this->git->commit($file, array('m' => $msg));
-    $this->git->push('origin', 'master');
   }
 
   public function updateOrigin($url) {
