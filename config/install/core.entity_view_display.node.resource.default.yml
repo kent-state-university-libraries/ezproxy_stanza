@@ -2,7 +2,6 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.resource.body
     - field.field.node.resource.field_ezproxy_order
     - field.field.node.resource.field_ezproxy_review
     - field.field.node.resource.field_ezproxy_stanza
@@ -17,13 +16,6 @@ targetEntityType: node
 bundle: resource
 mode: default
 content:
-  body:
-    label: hidden
-    type: text_default
-    weight: 101
-    settings: {  }
-    third_party_settings: {  }
-    region: content
   field_ezproxy_review:
     weight: 106
     label: above
