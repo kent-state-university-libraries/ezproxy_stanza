@@ -149,6 +149,6 @@ class EZProxyStanzaSettingsForm extends FormBase {
 
     drupal_set_message($this->t('Your changes have been saved.'));
 
-    $form_state->setRedirect('view.ezproxy_stanzas.page_1');
+    $form_state->setRedirect('ezproxy_stanza.manage');
   }
 }

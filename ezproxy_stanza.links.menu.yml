@@ -1,4 +1,4 @@
 ezproxy_stanza.admin:
   title: EZProxy
-  route_name: view.ezproxy_stanzas.page_1
+  route_name: ezproxy_stanza.manage
   parent: system.admin_content

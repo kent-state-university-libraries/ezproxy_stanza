@@ -4,10 +4,10 @@ ezproxy_stanza.add_stanza_action:
     node_type: 'resource'
   title: 'Add a stanza'
   appears_on:
-    - view.ezproxy_stanzas.page_1
+    - ezproxy_stanza.manage
 ezproxy_stanza.download_config:
   route_name: ezproxy_stanza.download_config
   title: 'View config.txt'
   appears_on:
-    - view.ezproxy_stanzas.page_1
+    - ezproxy_stanza.manage
 

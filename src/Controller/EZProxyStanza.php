@@ -7,9 +7,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Drupal\ezproxy_stanza\Git\PublicRepo;
 use Drupal\ezproxy_stanza\Git\PrivateRepo;
-use Drupal\node\Entity\Node;
 
 class EZProxyStanza extends ControllerBase implements ContainerInjectionInterface {
 
@@ -70,5 +68,18 @@ class EZProxyStanza extends ControllerBase implements ContainerInjectionInterfac
     $response = new Response('1');
 
     return $response->setPrivate();
+  }
+
+  public function view() {
+    $build = [];
+    $build['search'] = [
+      '#type' => 'view',
+      '#name' => 'ezproxy_stanza_search',
+      '#display_id' => 'default',
+    ];
+
+    $build['config'] = \Drupal::formBuilder()->getForm('Drupal\ezproxy_stanza\Form\EZProxyStanzaConfigForm');
+
+    return $build;
   }
 }
