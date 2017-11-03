@@ -106,16 +106,21 @@ class EZProxyStanzaConfigForm extends FormBase {
     $form['config']['#options'] = [];
 
     foreach ($result as $node) {
-      $url_components = explode('/', $node->url);
-      $form['config']['#options'][$node->nid] = [
-        $node->title,
-        Link::fromTextandUrl(array_pop($url_components), Url::fromUri($node->url, ['attributes' => ['target' => '_blank']]))->toString(),
-        $date_formatter->formatDiff($node->changed, REQUEST_TIME, [
-          'granularity' => 2,
-          'return_as_object' => FALSE,
-        ]) . ' ' . $this->t('ago')
-      ];
+      $row = [];
+      $row[] = $node->title;
+      if (filter_var($node->url, FILTER_VALIDATE_URL)) {
+        $url_components = explode('/', $node->url);
+        $row[] = Link::fromTextandUrl(array_pop($url_components), Url::fromUri($node->url, ['attributes' => ['target' => '_blank']]))->toString();
+      }
+      else {
+        $row[] = '';
+      }
 
+      $row[] = $date_formatter->formatDiff($node->changed, REQUEST_TIME, [
+        'granularity' => 2,
+        'return_as_object' => FALSE,
+      ]) . ' ' . $this->t('ago');
+      $form['config']['#options'][$node->nid][] = $row;
       if ($node->status) {
         $form['config']['#default_value'][$node->nid] = $node->nid;
       }
