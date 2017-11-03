@@ -20,7 +20,7 @@ class PrivateRepo extends Git {
     }
   }
 
-  public function setFileContents($file, $contents) {
+  public function setFileContents($file, $contents, $install = false) {
     if ($file === 'config.txt') {
       $this->setConfig($contents);
     }
