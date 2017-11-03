@@ -2,3 +2,7 @@ administer ezproxy server:
   title: "Edit EZProxy's config.txt"
   description: "This is akin to giving this user the ability to edit your EZProxy server's config.txt file."
   restrict access: TRUE
+administer ezproxy settings:
+  title: "Edit EZProxy's admin settings"
+  description: "This allows editing where the git repository is configured, private keys, etc."
+  restrict access: TRUE

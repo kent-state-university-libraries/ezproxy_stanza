@@ -11,7 +11,7 @@ ezproxy_stanza.settings:
     _form: '\Drupal\ezproxy_stanza\Form\EZProxyStanzaSettingsForm'
     _title: 'Settings'
   requirements:
-    _permission: 'administer ezproxy server'
+    _permission: 'administer ezproxy settings'
 ezproxy_stanza.download_config:
   path: '/admin/content/ezproxy/download'
   defaults:
