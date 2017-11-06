@@ -107,7 +107,13 @@ class EZProxyStanzaConfigForm extends FormBase {
 
     foreach ($result as $node) {
       $row = &$form['config']['#options'][$node->nid];
-      $row[] = Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], ['query' => ['destination' => 'admin/content/ezproxy']]))->toString();
+
+      $uri_options = [
+        'query' => [
+          'destination' =>  Url::fromRoute('ezproxy_stanza.manage')->toString()
+        ]
+      ];
+      $row[] = Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], $uri_options))->toString();
 
       if (filter_var($node->url, FILTER_VALIDATE_URL)) {
         $url_components = explode('/', $node->url);
