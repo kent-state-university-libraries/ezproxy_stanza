@@ -204,4 +204,9 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
     '#type' => 'submit',
     '#value' => 'Cancel'
   ];
+
+  // make the stanza textarea as long as the stanza
+  $stanza_widget = &$form['field_ezproxy_stanza']['widget'][0]['value'];
+  $lines = substr_count($stanza_widget['#default_value'], "\n");
+  $stanza_widget['#rows'] = $lines ? $lines + 1 : $stanza_widget['#rows'];
 }
