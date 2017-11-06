@@ -106,8 +106,9 @@ class EZProxyStanzaConfigForm extends FormBase {
     $form['config']['#options'] = [];
 
     foreach ($result as $node) {
-      $row = [];
-      $row[] = $node->title;
+      $row = &$form['config']['#options'][$node->nid];
+      $row[] = Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], ['query' => ['destination' => 'admin/content/ezproxy']]))->toString();
+
       if (filter_var($node->url, FILTER_VALIDATE_URL)) {
         $url_components = explode('/', $node->url);
         $row[] = Link::fromTextandUrl(array_pop($url_components), Url::fromUri($node->url, ['attributes' => ['target' => '_blank']]))->toString();
@@ -120,7 +121,9 @@ class EZProxyStanzaConfigForm extends FormBase {
         'granularity' => 2,
         'return_as_object' => FALSE,
       ]) . ' ' . $this->t('ago');
-      $form['config']['#options'][$node->nid][] = $row;
+
+      // if this node is published // in config.txt
+      // set the tableselect checkbox to checked
       if ($node->status) {
         $form['config']['#default_value'][$node->nid] = $node->nid;
       }
