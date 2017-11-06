@@ -194,3 +194,14 @@ function ezproxy_stanza_file_download($uri) {
 
   return NULL;
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // add a cancel button to resource node edit form to take people back to config.txt admin UI
+  $form['actions']['cancel'] = [
+    '#type' => 'submit',
+    '#value' => 'Cancel'
+  ];
+}
