@@ -60,20 +60,21 @@ class EZProxyStanzaConfigEditForm extends FormBase {
       ];
 
       $form['actions']['#type'] = 'actions';
-      $form['actions']['deploy'] = [
+      $form['actions']['cancel'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Save and deploy'),
-        '#button_type' => 'danger',
+        '#value' => $this->t('Close'),
       ];
       $form['actions']['submit'] = [
         '#type' => 'submit',
         '#value' => $this->t('Save'),
         '#button_type' => 'primary',
       ];
-      $form['actions']['cancel'] = [
+      $form['actions']['deploy'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Close'),
+        '#value' => $this->t('Save and deploy'),
+        '#button_type' => 'danger',
       ];
+
     }
     else {
       $form[] = [
