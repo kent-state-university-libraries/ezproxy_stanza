@@ -5,6 +5,7 @@ use Drupal\node\Entity\Node;
 use Drupal\ezproxy_stanza\Git\PublicRepo;
 use Drupal\ezproxy_stanza\Git\PrivateRepo;
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\user\Entity\Role;
 
 const EZPROXY_STANZA_REPO_PUBLIC = 'private://ezproxy_stanza/public';
@@ -209,4 +210,20 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
   $stanza_widget = &$form['field_ezproxy_stanza']['widget'][0]['value'];
   $lines = substr_count($stanza_widget['#default_value'], "\n");
   $stanza_widget['#rows'] = $lines ? $lines + 1 : $stanza_widget['#rows'];
+
+  // if there is a stanza URL this resource used
+  // show a link to the stanza to easily compare the remote vs local versions
+  if (!empty($form['field_ezproxy_url']['widget'][0]['uri']['#default_value'])) {
+    $oclc_url = $form['field_ezproxy_url']['widget'][0]['uri']['#default_value'];
+    if (filter_var($oclc_url, FILTER_VALIDATE_URL)) {
+      $options = [
+        'attributes' => [
+          'target' => '_blank',
+          'onclick' => "window.open('$oclc_url', 'SecurityHistory', 'top=200,left=400,width=800,height=500,scrollbars,toolbar=no,location=no,menubar=no,resizable=yes')"
+        ]
+      ];
+      $link = Link::fromTextandUrl(t("View OCLC's stanza"), Url::fromUri($oclc_url, $options))->toString();
+      drupal_set_message($link);
+    }
+  }
 }
