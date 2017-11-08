@@ -94,17 +94,17 @@ class EZProxyStanzaConfigForm extends FormBase {
       '#sticky' => TRUE,
     ];
     $args = [':type' => 'resource'];
-    $sql = "SELECT o.field_ezproxy_order_value AS `order`, u.field_ezproxy_url_uri AS url, n.title, n.nid, n.changed, n.status
+    $sql = "SELECT o.field_ezproxy_order_value AS `order`, u.field_ezproxy_url_uri AS url, r.field_ezproxy_review_value AS needs_review, n.title, n.nid, n.changed, n.status
       FROM {node_field_data} n
       INNER JOIN {node__field_ezproxy_order} o ON n.nid = o.entity_id AND o.deleted = '0'
       LEFT JOIN {node__field_ezproxy_url} u ON n.nid = u.entity_id AND u.deleted = '0'
+      LEFT JOIN {node__field_ezproxy_review} r ON n.nid = r.entity_id AND r.deleted = '0'
       WHERE n.type = :type
       ORDER BY `order` ASC, title ASC";
 
     $result = \Drupal::database()->query($sql, $args);
     $date_formatter = \Drupal::service('date.formatter');
     $form['config']['#options'] = [];
-
     foreach ($result as $node) {
       $row = &$form['config']['#options'][$node->nid];
 
@@ -113,7 +113,10 @@ class EZProxyStanzaConfigForm extends FormBase {
           'destination' =>  Url::fromRoute('ezproxy_stanza.manage')->toString()
         ]
       ];
-      $row[] = Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], $uri_options))->toString();
+      $row[] = [
+        'class' => 'title',
+        'data' => Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], $uri_options))->toString()
+      ];
 
       if (filter_var($node->url, FILTER_VALIDATE_URL)) {
         $url_components = explode('/', $node->url);
@@ -122,7 +125,6 @@ class EZProxyStanzaConfigForm extends FormBase {
       else {
         $row[] = '';
       }
-
       $row[] = $date_formatter->formatDiff($node->changed, REQUEST_TIME, [
         'granularity' => 2,
         'return_as_object' => FALSE,
@@ -132,6 +134,11 @@ class EZProxyStanzaConfigForm extends FormBase {
       // set the tableselect checkbox to checked
       if ($node->status) {
         $form['config']['#default_value'][$node->nid] = $node->nid;
+      }
+
+      // if the stanza needs reviewed, add a visual cue
+      if (!empty($node->needs_review)) {
+        $row['#attributes'] = ['class' => ['messages', 'messages--warning']];
       }
     }
 

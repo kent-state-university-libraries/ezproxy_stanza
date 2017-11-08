@@ -1,3 +1,13 @@
+.messages--warning {
+  background-image: none !important;
+}
+
+.messages--warning .title a::before {
+  content: '!!!!';
+  background-image: url(/core/misc/icons/e29700/warning.svg);
+  color: transparent;
+  margin-right: 5px;
+}
 
 .js-form-item-action,
 #edit-submit--2,
