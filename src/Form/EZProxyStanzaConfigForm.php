@@ -88,18 +88,21 @@ class EZProxyStanzaConfigForm extends FormBase {
       '#type' => 'tableselect',
       '#header' => [
         $this->t('Name'),
-        $this->t('OCLC URL'),
         $this->t('Last Updated'),
+        $this->t('Last Updated By')
       ],
       '#sticky' => TRUE,
     ];
     $args = [':type' => 'resource'];
-    $sql = "SELECT o.field_ezproxy_order_value AS `order`, u.field_ezproxy_url_uri AS url, r.field_ezproxy_review_value AS needs_review, n.title, n.nid, n.changed, n.status
+    $sql = "SELECT o.field_ezproxy_order_value AS `order`,
+      r.field_ezproxy_review_value AS needs_review,
+      n.title, n.nid, n.changed, n.status, u.name
       FROM {node_field_data} n
+      INNER JOIN {node_revision} revision ON revision.vid = n.vid
+      LEFT JOIN {users_field_data} u ON u.uid = revision_uid
       INNER JOIN {node__field_ezproxy_order} o ON n.nid = o.entity_id AND o.deleted = '0'
-      LEFT JOIN {node__field_ezproxy_url} u ON n.nid = u.entity_id AND u.deleted = '0'
       LEFT JOIN {node__field_ezproxy_review} r ON n.nid = r.entity_id AND r.deleted = '0'
-      WHERE n.type = :type
+      WHERE n.type = 'resource'
       ORDER BY `order` ASC, title ASC";
 
     $result = \Drupal::database()->query($sql, $args);
@@ -118,13 +121,6 @@ class EZProxyStanzaConfigForm extends FormBase {
         'data' => Link::fromTextandUrl($node->title, Url::fromRoute('entity.node.edit_form', ['node' => $node->nid], $uri_options))->toString()
       ];
 
-      if (filter_var($node->url, FILTER_VALIDATE_URL)) {
-        $url_components = explode('/', $node->url);
-        $row[] = Link::fromTextandUrl(array_pop($url_components), Url::fromUri($node->url, ['attributes' => ['target' => '_blank']]))->toString();
-      }
-      else {
-        $row[] = '';
-      }
       $row[] = $date_formatter->formatDiff($node->changed, REQUEST_TIME, [
         'granularity' => 2,
         'return_as_object' => FALSE,
@@ -139,6 +135,16 @@ class EZProxyStanzaConfigForm extends FormBase {
       // if the stanza needs reviewed, add a visual cue
       if (!empty($node->needs_review)) {
         $row['#attributes'] = ['class' => ['messages', 'messages--warning']];
+      }
+
+      if (strlen($node->name)) {
+        $row[] = $node->name;
+      }
+      elseif (is_null($node->name)) {
+        $row[] = $this->t('Unknown');
+      }
+      else {
+        $row[] = $this->t('OCLC Update');
       }
     }
 
@@ -156,6 +162,7 @@ class EZProxyStanzaConfigForm extends FormBase {
       '#button_type' => 'danger',
     ];
 
+    drupal_set_message($this->t('If OCLC provided additional instructions for a stanza it will be marked like this.'), 'warning');
     return $form;
   }
 

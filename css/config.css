@@ -1,8 +1,9 @@
-.messages--warning {
+#edit-config .messages--warning {
   background-image: none !important;
+  box-shadow: none;
 }
 
-.messages--warning .title a::before {
+#edit-config .messages--warning .title a::before {
   content: '!!!!';
   background-image: url(/core/misc/icons/e29700/warning.svg);
   color: transparent;
