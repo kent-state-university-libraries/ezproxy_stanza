@@ -23,11 +23,24 @@ class EZProxyStanzaConfigForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['#attached']['library'][] = 'ezproxy_stanza/config-ui';
-/**
- * @todo hookup filters
+
     $form['filter'] = [
       '#type' => 'container',
     ];
+    foreach (['status', 'review'] as $filter) {
+      $$filter = $form_state->getValue($filter);
+      if (is_null($$filter) || $$filter == -1) {
+        $$filter = -1;
+      }
+      elseif (!isset($form['filter']['reset'])) {
+        $form['filter']['reset'] = [
+          '#type' => 'submit',
+          '#value' => $this->t('Reset'),
+          '#weight' => 101,
+        ];
+      }
+    }
+
     $form['filter']['status'] = [
       '#type' => 'select',
       '#title' => $this->t('In config.txt'),
@@ -36,6 +49,7 @@ class EZProxyStanzaConfigForm extends FormBase {
         NODE_PUBLISHED => $this->t('Yes'),
         NODE_NOT_PUBLISHED => $this->t('No'),
       ],
+      '#default_value' => $status,
     ];
     $form['filter']['review'] = [
       '#type' => 'select',
@@ -45,13 +59,14 @@ class EZProxyStanzaConfigForm extends FormBase {
         TRUE => $this->t('Yes'),
         FALSE => $this->t('No'),
       ],
+      '#default_value' => $review,
     ];
 
     $form['filter']['submit'] = [
       '#type' => 'submit',
-      '#value' => 'Apply',
+      '#value' => $this->t('Apply'),
+      '#weight' => 100,
     ];
-*/
 
     // check if the repository has had any changes
     $repo = new PrivateRepo();
@@ -84,15 +99,6 @@ class EZProxyStanzaConfigForm extends FormBase {
       }
     }
 
-    $form['config'] = [
-      '#type' => 'tableselect',
-      '#header' => [
-        $this->t('Name'),
-        $this->t('Last Updated'),
-        $this->t('Last Updated By')
-      ],
-      '#sticky' => TRUE,
-    ];
     $args = [':type' => 'resource'];
     $sql = "SELECT o.field_ezproxy_order_value AS `order`,
       r.field_ezproxy_review_value AS needs_review,
@@ -102,9 +108,30 @@ class EZProxyStanzaConfigForm extends FormBase {
       LEFT JOIN {users_field_data} u ON u.uid = revision_uid
       INNER JOIN {node__field_ezproxy_order} o ON n.nid = o.entity_id AND o.deleted = '0'
       LEFT JOIN {node__field_ezproxy_review} r ON n.nid = r.entity_id AND r.deleted = '0'
-      WHERE n.type = 'resource'
-      ORDER BY `order` ASC, title ASC";
+      WHERE n.type = :type";
 
+    $filter = FALSE;
+    if ($status != -1) {
+      $sql .= ' AND n.status = :status';
+      $args[':status'] = $status;
+      $filter = TRUE;
+    }
+    if ($review != -1) {
+      $sql .= ' AND r.field_ezproxy_review_value = :review';
+      $args[':review'] = $review;
+      $filter = TRUE;
+    }
+    $sql .= " ORDER BY `order` ASC, title ASC";
+
+    $form['config'] = [
+      '#type' => 'tableselect',
+      '#header' => [
+        $this->t('Name'),
+        $this->t('Last Updated'),
+        $this->t('Last Updated By')
+      ],
+      '#sticky' => TRUE,
+    ];
     $result = \Drupal::database()->query($sql, $args);
     $date_formatter = \Drupal::service('date.formatter');
     $form['config']['#options'] = [];
@@ -129,7 +156,12 @@ class EZProxyStanzaConfigForm extends FormBase {
       // if this node is published // in config.txt
       // set the tableselect checkbox to checked
       if ($node->status) {
-        $form['config']['#default_value'][$node->nid] = $node->nid;
+        // if there are filters applied we had to perform a $form_state->setRebuild()
+        // so we'll have to set #value for checkboxes to be checked since #default_value is ignored on form rebuilds
+        // We won't be able to save/deploy the form so setting #value here is fine (setting #value ignored user input)
+        // we're just setting #value for looks i.e. to check the boxes next to resources in config.txt
+        $index = $filter ? '#value' : '#default_value';
+        $form['config'][$index][$node->nid] = $node->nid;
       }
 
       // if the stanza needs reviewed, add a visual cue
@@ -148,21 +180,30 @@ class EZProxyStanzaConfigForm extends FormBase {
       }
     }
 
-    $form_state->set('ezproxy_stanza_published', $form['config']['#default_value']);
+    if (!$form_state->get('ezproxy_stanza_published')) {
+      $form_state->set('ezproxy_stanza_published', $form['config']['#default_value']);
+    }
 
-    $form['actions'] = ['#type' => 'actions'];
-    $form['actions']['save'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
-      '#button_type' => 'primary',
-    ];
-    $form['actions']['deploy'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save and deploy'),
-      '#button_type' => 'danger',
-    ];
+    // if there are no filters applied, add the save/deploy buttons
+    if (count($args) === 1) {
+      $form['actions'] = ['#type' => 'actions'];
+      $form['actions']['save'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save'),
+        '#button_type' => 'primary',
+      ];
+      $form['actions']['deploy'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Save and deploy'),
+        '#button_type' => 'danger',
+        '#attributes' => [
+          'onclick' => "return confirm('" . $this->t('You sure? This will deploy your config.txt to your EZProxy server.') . "')",
+        ],
+      ];
+    }
 
     drupal_set_message($this->t('If OCLC provided additional instructions for a stanza it will be marked like this.'), 'warning');
+
     return $form;
   }
 
@@ -175,6 +216,17 @@ class EZProxyStanzaConfigForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $op = $form_state->getValue('op')->__toString();
+
+    if ($op == $this->t('Apply')->__toString()) {
+      $form_state->setRebuild();
+      drupal_set_message($this->t('You will need to reset all filters before you can save or deploy.'), 'error');
+      return;
+    }
+    elseif ($op == $this->t('Reset')->__toString()) {
+      return;
+    }
+
     $previously_published = $form_state->get('ezproxy_stanza_published');
     $published = $unpublished = [];
     foreach ($form_state->getValue('config') as $nid => $value) {
@@ -197,7 +249,7 @@ class EZProxyStanzaConfigForm extends FormBase {
       if ($status !== -1) {
         $node->set('status', $status);
         $node->setNewRevision(TRUE);
-        $node->revision_log = $status === NODE_PUBLISHED ? t('Adding to config.txt') : t('Removing from config.txt');
+        $node->revision_log = $status === NODE_PUBLISHED ? $this->t('Adding to config.txt') : $this->t('Removing from config.txt');
         $node->setRevisionCreationTime(\Drupal::time()->getRequestTime());
         $node->setRevisionUserId(\Drupal::currentUser()->id());
         $node->save();
@@ -206,30 +258,30 @@ class EZProxyStanzaConfigForm extends FormBase {
 
     $msg = '';
     if (count($published)) {
-      drupal_set_message(t('Successfully added @titles to config.txt.', ['@titles' => implode(', ', $published)]));
-      $msg .= t('Added @titles to config.txt.', ['@titles' => implode(', ', $published)])->__toString();
+      drupal_set_message($this->t('Successfully added @titles to config.txt.', ['@titles' => implode(', ', $published)]));
+      $msg .= $this->t('Added @titles to config.txt.', ['@titles' => implode(', ', $published)])->__toString();
     }
     if (count($unpublished)) {
-      drupal_set_message(t('Successfully removed @titles from config.txt.', ['@titles' => implode(', ', $unpublished)]));
+      drupal_set_message($this->t('Successfully removed @titles from config.txt.', ['@titles' => implode(', ', $unpublished)]));
       if (count($published)) {
         $msg .= ' ';
       }
-      $msg .= t('Removed @titles to config.txt.', ['@titles' => implode(', ', $unpublished)])->__toString();
+      $msg .= $this->t('Removed @titles to config.txt.', ['@titles' => implode(', ', $unpublished)])->__toString();
     }
 
     $repo = new PrivateRepo();
     $repo->setConfig();
 
-    if ($form_state->getValue('op')->__toString() === t('Save and deploy')->__toString()) {
+    if ($op === $this->t('Save and deploy')->__toString()) {
       if ($repo->hasChanges()) {
         if (strlen($msg) == '') {
-          $msg = t('Update config.txt')->__toString();
+          $msg = $this->t('Update config.txt')->__toString();
         }
         $repo->updateRemote($msg);
-        drupal_set_message(t('Deployed successfully.'));
+        drupal_set_message($this->t('Deployed successfully.'));
       }
       else {
-        drupal_set_message(t('No changes to deploy.'));
+        drupal_set_message($this->t('No changes to deploy.'));
       }
     }
   }

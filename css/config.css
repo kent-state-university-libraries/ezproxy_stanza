@@ -17,10 +17,12 @@
 }
 
 #views-exposed-form-ezproxy-stanza-search-default div[data-drupal-selector="edit-actions"],
-#views-exposed-form-ezproxy-stanzas-page-1 div[data-drupal-selector="edit-actions"] {
+#edit-filter .form-submit,
+#edit-filter .form-reset  {
   clear: none;
   float: left;
   margin-top: 2em;
+  margin-right: 0px !important;
 }
 
 #edit-diff--description .deleted {
@@ -28,4 +30,9 @@
 }
 #edit-diff--description .added {
   background-color: #dfd;
+}
+
+#edit-filter .form-item {
+  float: left;
+  margin-right: 1em;
 }
