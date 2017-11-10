@@ -199,6 +199,7 @@ class EZProxyStanzaConfigForm extends FormBase {
         $node->setNewRevision(TRUE);
         $node->revision_log = $status === NODE_PUBLISHED ? t('Adding to config.txt') : t('Removing from config.txt');
         $node->setRevisionCreationTime(\Drupal::time()->getRequestTime());
+        $node->setRevisionUserId(\Drupal::currentUser()->id());
         $node->save();
       }
     }
