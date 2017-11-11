@@ -10,7 +10,7 @@
             "homepage": "https://www.drupal.org/u/joecorall",
             "role": "Developer"
         }
-    ]
+    ],
     "require": {
       "drupal/weight": "~3.0",
       "cpliakas/git-wrapper": "dev-master#141d53fc80707666bc453140e3cd7cba8ecd2dee"

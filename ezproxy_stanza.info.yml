@@ -1,5 +1,5 @@
 name: EZProxy Stanza
-description: Manage your EZProxy config files
+description: Administrative interface that helps manage your EZProxy configuration files, and keeps your stanzas up to date with OCLC's stanzas.
 package: EZProxy
 type: module
 configure: ezproxy_stanza.settings
