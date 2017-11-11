@@ -73,6 +73,9 @@ class EZProxyStanzaConfigEditForm extends FormBase {
         '#type' => 'submit',
         '#value' => $this->t('Save and deploy'),
         '#button_type' => 'danger',
+        '#attributes' => [
+          'onclick' => "return confirm('" . $this->t('You sure? This will deploy your config.txt to your EZProxy server.') . "')",
+        ],
       ];
 
     }
