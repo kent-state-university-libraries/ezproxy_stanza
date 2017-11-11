@@ -46,6 +46,10 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['priv'] = [
       '#type' => 'details',
       '#title' => $this->t('Your local repository'),
+      '#description' => $this->t('If connecting over SSH you will need to provide a private key below.<br><br>
+        <strong>The recommended method</strong> is to create a user account that <strong>only has access to this one repository</strong>,<br>
+        and embed the username/password in the URL
+        <br>e.g. https://[USER]:[PASS]@github.com/repo/path'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -73,7 +77,7 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['authentication'] = [
       '#type' => 'details',
       '#title' => $this->t('Authentication'),
-      '#description' => $this->t('How to authenticate. Either by using the SSH private key for you repository or username password.'),
+      '#description' => $this->t('How to authenticate. Either by using an SSH private key for your repository, or (preferrably) by embedding your username password in the URI you set above, and leaving the SSH textarea below blank.'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -82,7 +86,7 @@ class EZProxyStanzaSettingsForm extends FormBase {
       '#type' => 'details',
       '#title' => $this->t('SSH'),
       '#description' => $this->t('Ideally this is the private key of a deploy key that only has access to your local repository. The account associated with this key needs write access to the repository.'),
-      '#open' => TRUE, //!empty($settings['authentication']['ssh']['private_key']),
+      '#open' => !empty($settings['authentication']['ssh']['private_key']),
       '#tree' => TRUE,
     ];
     $form['authentication']['ssh']['private_key'] = [
@@ -91,28 +95,6 @@ class EZProxyStanzaSettingsForm extends FormBase {
       '#default_value' => isset($settings['authentication']['ssh']['private_key']) ? $settings['authentication']['ssh']['private_key'] : '',
       '#rows' => 27,
     ];
-
-    /**
-     * @todo support username/passwords
-     *
-    $form['authentication']['credentials'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Credentials'),
-      '#description' => $this->t('Ideally this is a user account that only has access to your local repository.'),
-      '#open' => !empty($settings['authentication']['credentials']['username']),
-      '#tree' => TRUE,
-    ];
-    $form['authentication']['credentials']['username'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Username to private repository'),
-      '#default_value' => isset($settings['authentication']['credentials']['username']) ? $settings['authentication']['credentials']['username'] : '',
-    ];
-    $form['authentication']['credentials']['password'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Password to private repository'),
-      '#default_value' => isset($settings['authentication']['credentials']['password']) ? $settings['authentication']['credentials']['password'] : '',
-    ];
-    */
 
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = [
