@@ -46,9 +46,6 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['priv'] = [
       '#type' => 'details',
       '#title' => $this->t('Your local repository'),
-      '#description' => $this->t('<strong>The recommended method</strong> is to create a user account that <strong>only has access to this one repository</strong>, and embed the username/password in the URL
-        <br>e.g. https://[USER]:[PASS]@github.com/repo/path<br><br>
-        Alternatively, if you\'re connecting over SSH you will need to provide a private key in the "Authentication" section below.<br><br>'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -76,7 +73,9 @@ class EZProxyStanzaSettingsForm extends FormBase {
     $form['authentication'] = [
       '#type' => 'details',
       '#title' => $this->t('Authentication'),
-      '#description' => $this->t('How to authenticate. Either by using an SSH private key for your repository, or (preferrably) by embedding your username password in the URI you set above, and leaving the SSH textarea below blank.'),
+      '#description' => $this->t('How to authenticate.<p><strong>The recommended method</strong> is to create a user account that <strong>only has access to this one repository</strong>, and embed the username/password in the URL above
+        <br>e.g. https://[USER]:[PASS]@github.com/repo/path</p>
+        <p>Alternatively, if you\'re connecting over SSH you will need to provide a private key in the textarea below.</p>'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
