@@ -3,6 +3,14 @@
     "type": "drupal-module",
     "homepage": "https://www.drupal.org/project/ezproxy_stanza",
     "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Joe Corall",
+            "email": "jcorall@kent.edu",
+            "homepage": "https://www.drupal.org/u/joecorall",
+            "role": "Developer"
+        }
+    ]
     "require": {
       "drupal/weight": "~3.0",
       "cpliakas/git-wrapper": "dev-master#141d53fc80707666bc453140e3cd7cba8ecd2dee"
