@@ -203,7 +203,8 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
   // add a cancel button to resource node edit form to take people back to config.txt admin UI
   $form['actions']['cancel'] = [
     '#type' => 'submit',
-    '#value' => 'Cancel'
+    '#value' => 'Cancel',
+    '#submit' => ['_ezproxy_stanza_node_update'],
   ];
 
   // make the stanza textarea as long as the stanza
@@ -213,7 +214,8 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
 
   // if there is a stanza URL this resource used
   // show a link to the stanza to easily compare the remote vs local versions
-  if (!empty($form['field_ezproxy_url']['widget'][0]['uri']['#default_value'])) {
+  if (!empty($form['field_ezproxy_url']['widget'][0]['uri']['#default_value'])
+    && empty($form_state->get('ezproxy_stanza_link_displayed'))) {
     $oclc_url = $form['field_ezproxy_url']['widget'][0]['uri']['#default_value'];
     if (filter_var($oclc_url, FILTER_VALIDATE_URL)) {
       $options = [
@@ -225,5 +227,23 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
       $link = Link::fromTextandUrl(t("View OCLC's stanza"), Url::fromUri($oclc_url, $options))->toString();
       drupal_set_message($link);
     }
+  }
+
+  $form['actions']['publish']['#submit'][] = '_ezproxy_stanza_node_update';
+  $form['actions']['unpublish']['#submit'][] = '_ezproxy_stanza_node_update';
+}
+
+function _ezproxy_stanza_node_update($form, FormStateInterface $form_state) {
+  // clear out the "View OCLC's stanza" message
+  drupal_get_messages('status');
+
+  $node = $form_state->getFormObject()->getEntity();
+
+  // if the stanza has changed while editing the node, update the config.txt
+  if ($node->get('field_ezproxy_stanza')->value !=
+    $form['field_ezproxy_stanza']['widget'][0]['value']['#default_value']) {
+    // incase any changes were made to node, update the repo right away
+    $repo = new PrivateRepo();
+    $repo->setConfig();
   }
 }
