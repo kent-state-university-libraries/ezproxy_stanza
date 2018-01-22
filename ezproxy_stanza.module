@@ -44,10 +44,13 @@ function ezproxy_stanza_cron() {
   // if there has been an update to a stanza from OCLC
   if (count($files)) {
     $updates = [];
-    $nids = \Drupal::entityQuery('node')
-      ->condition('type', 'resource')
-      ->condition('field_ezproxy_url.uri', array_keys($files), 'IN')
-      ->execute();
+    $d_args = [
+      ':bundle' => 'resource',
+      ':uris[]' => array_keys($files)
+    ];
+    $nids = \Drupal::database()->query('SELECT entity_id FROM {node__field_ezproxy_url}
+      WHERE bundle = :bundle AND field_ezproxy_url_uri IN (:uris[])', $d_args
+    )->fetchCol();
     foreach ($nids as $vid => $nid) {
       $node = Node::load($nid);
       $url = $node->field_ezproxy_url->uri;
