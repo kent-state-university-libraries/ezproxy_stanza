@@ -3,6 +3,9 @@ status: true
 dependencies:
   module:
     - node
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.field_ezproxy_review
 field_name: field_ezproxy_review
 entity_type: node

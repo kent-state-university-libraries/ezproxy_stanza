@@ -6,6 +6,9 @@ dependencies:
     - node.type.resource
   module:
     - link
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.resource.field_ezproxy_url
 field_name: field_ezproxy_url
 entity_type: node

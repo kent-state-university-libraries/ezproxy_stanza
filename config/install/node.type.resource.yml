@@ -3,6 +3,9 @@ status: true
 dependencies:
   module:
     - menu_ui
+  enforced:
+    module:
+      - ezproxy_stanza
 third_party_settings:
   menu_ui:
     available_menus: {  }

@@ -7,6 +7,9 @@ dependencies:
   module:
     - text
     - user
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.resource.teaser
 targetEntityType: node
 bundle: resource

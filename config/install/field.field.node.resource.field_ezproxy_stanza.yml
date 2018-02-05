@@ -4,6 +4,11 @@ dependencies:
   config:
     - field.storage.node.field_ezproxy_stanza
     - node.type.resource
+  module:
+    - ezproxy_stanza
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.resource.field_ezproxy_stanza
 field_name: field_ezproxy_stanza
 entity_type: node

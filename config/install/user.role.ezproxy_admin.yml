@@ -1,6 +1,11 @@
 langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  module:
+    - ezproxy_stanza
+  enforced:
+    module:
+      - ezproxy_stanza
 id: ezproxy_admin
 label: 'EZProxy Admin'
 weight: 4

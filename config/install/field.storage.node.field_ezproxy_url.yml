@@ -4,6 +4,9 @@ dependencies:
   module:
     - link
     - node
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.field_ezproxy_url
 field_name: field_ezproxy_url
 entity_type: node

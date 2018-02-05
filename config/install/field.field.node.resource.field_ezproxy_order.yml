@@ -6,6 +6,9 @@ dependencies:
     - node.type.resource
   module:
     - weight
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.resource.field_ezproxy_order
 field_name: field_ezproxy_order
 entity_type: node

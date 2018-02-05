@@ -11,6 +11,9 @@ dependencies:
     - link
     - text
     - user
+  enforced:
+    module:
+      - ezproxy_stanza
 id: node.resource.default
 targetEntityType: node
 bundle: resource

@@ -7,6 +7,9 @@ dependencies:
   module:
     - node
     - user
+  enforced:
+    module:
+      - ezproxy_stanza
 id: ezproxy_stanza_search
 label: 'EZProxy Stanza Search'
 module: views
