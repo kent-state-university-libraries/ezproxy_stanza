@@ -135,5 +135,13 @@ function ezproxy_stanza_install() {
  */
 function ezproxy_stanza_uninstall() {
   file_unmanaged_delete_recursive('private://ezproxy_stanza');
-  // @todo delete all nodes
+
+  // delete all nodes of type "resource"
+  $nids = \Drupal::entityQuery('node')
+    ->condition('type', 'resource')
+    ->execute();
+  foreach ($nids as $nid) {
+    $node = Node::load($nid);
+    $node->delete();
+  }
 }
