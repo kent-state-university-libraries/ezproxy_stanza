@@ -10,14 +10,10 @@ class PrivateRepo extends Git {
   public function __construct() {
     parent::__construct(EZPROXY_STANZA_REPO_PRIV, 'priv');
     $this->private_key_path = $this->_get_priv_key_path();
+    $this->_writePrivateKey();
   }
 
   public function __destruct() {
-    // remove the private key (if one exists)
-    if (file_exists($this->private_key_path)) {
-      $this->unsetPrivateKey();
-      unlink($this->private_key_path);
-    }
   }
 
   public function setFileContents($file, $contents, $install = false) {
@@ -91,8 +87,9 @@ class PrivateRepo extends Git {
   }
 
   private function _get_priv_key_path() {
-    $path = file_directory_temp();
-    $path .= DIRECTORY_SEPARATOR . 'ezproxy_stanza_id_rsa';
+    $info = posix_getpwuid(posix_getuid());
+    $path = isset($info['dir']) && is_dir($info['dir']) ? $info['dir'] : file_directory_temp();
+    $path .= DIRECTORY_SEPARATOR . '.ssh' . DIRECTORY_SEPARATOR . 'id_rsa';
 
     return $path;
   }
