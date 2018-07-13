@@ -18,6 +18,7 @@ const EZPROXY_STANZA_CONFIG_TERMINATOR = '### DO NOT WRITE BELOW THIS LINE. IT W
  * @todo use Queue API
  */
 function ezproxy_stanza_cron() {
+
   // open up the OCLC git repo
   // and fetch any commits
   $git = new PublicRepo();
@@ -36,7 +37,8 @@ function ezproxy_stanza_cron() {
   foreach (explode("\n", $logs) as $line) {
     $parts = explode('/', $line);
     if (count($parts) === 3 && $parts[0] === 'stanzas' && $parts[2] === 'stanza.txt') {
-      $url = 'https://www.oclc.org/support/services/ezproxy/documentation/db/' . $parts[1] . '.en.html';
+      $url = 'https://help.oclc.org/Library_Management/EZproxy/Database_stanzas/' . $parts[1];
+      drupal_set_message($url);
       $files[$url] = $line;
     }
   }
@@ -57,6 +59,9 @@ function ezproxy_stanza_cron() {
       $stanza_file = EZPROXY_STANZA_REPO_PUBLIC . DIRECTORY_SEPARATOR . $files[$url];
       $readme_file = str_replace(DIRECTORY_SEPARATOR . 'stanza.txt', DIRECTORY_SEPARATOR . 'README.md', $stanza_file);
       $stanza = file_get_contents($stanza_file);
+      $title = ezproxy_stanza_get_title($stanza);
+      $node->set('title', $title);
+
       // see when this file was last updated from git
       $stanza_changed = filemtime($stanza_file);
       // make sure the stanza indeed needs updated
@@ -95,30 +100,13 @@ function ezproxy_stanza_cron() {
 
       $stanza = file_get_contents($stanza_file);
       $lines = explode("\n", $stanza);
-      $title = FALSE;
-      foreach ($lines as $line) {
-        $spaces = explode(' ', trim($line));
-        $start = array_shift($spaces);
-        $start = strtolower($start);
-        if ($start === 't' || $start === 'title'
-          || substr($start, 0, 1) === 't' || substr($start, 0, 5) === 'title') {
-          $title = implode(' ', $spaces);
-          if (substr($title, 0, 6) === '-hide ') {
-            $title = substr($title, 7);
-          }
-          break;
-        }
-      }
-      if (!$title) {
-        $title = ucfirst($stanza_dir);
-      }
-
+      $title = ezproxy_stanza_get_title($stanza);
       $node = Node::create([
         'title' => $title,
         'type' => 'resource',
         'status' => NODE_NOT_PUBLISHED,
       ]);
-      $node->set('field_ezproxy_url', 'https://www.oclc.org/support/services/ezproxy/documentation/db/'.$stanza_dir.'.en.html');
+      $node->set('field_ezproxy_url', 'https://help.oclc.org/Library_Management/EZproxy/Database_stanzas/'.$stanza_dir);
 
       $node->set('field_ezproxy_stanza', $stanza);
       $node->set('field_ezproxy_review', file_exists($oclc_stanza_dir . DIRECTORY_SEPARATOR . 'README.md'));
@@ -249,4 +237,32 @@ function _ezproxy_stanza_node_update($form, FormStateInterface $form_state) {
     $repo = new PrivateRepo();
     $repo->setConfig();
   }
+}
+
+function ezproxy_stanza_get_title($stanza) {
+  $lines = explode("\n", $stanza);
+  $title = FALSE;
+  foreach ($lines as $line) {
+    $spaces = explode(' ', trim($line));
+    $start = array_shift($spaces);
+    $start = strtolower($start);
+    if ($start === 't' || $start === 'title'
+      || substr($start, 0, 1) === 't' || substr($start, 0, 5) === 'title') {
+      $title = implode(' ', $spaces);
+      if (substr($title, 0, 6) === '-hide ') {
+        $title = substr($title, 6);
+      }
+      break;
+    }
+  }
+  if (!$title) {
+    $title = ucfirst($stanza_dir);
+  }
+
+  $updated_date_pos = strpos($title, ' (updated');
+  if ($updated_date_pos) {
+    $title = substr($title, 0, $updated_date_pos);
+  }
+
+  return $title;
 }
