@@ -38,7 +38,6 @@ function ezproxy_stanza_cron() {
     $parts = explode('/', $line);
     if (count($parts) === 3 && $parts[0] === 'stanzas' && $parts[2] === 'stanza.txt') {
       $url = 'https://help.oclc.org/Library_Management/EZproxy/Database_stanzas/' . $parts[1];
-      drupal_set_message($url);
       $files[$url] = $line;
     }
   }
