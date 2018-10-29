@@ -89,7 +89,6 @@ class EZProxyStanzaConfigForm extends FormBase {
 
           if ($first_chr === '-' && $second_chr !== '-') {
             $line = '<span class="deleted">' . $line . '</span>';
-            ++$count;
           }
           elseif ($first_chr === '+' && $second_chr !== '+') {
             $line = '<span class="added">' . $line . '</span>';

@@ -100,6 +100,10 @@ function ezproxy_stanza_cron() {
       $stanza = file_get_contents($stanza_file);
       $lines = explode("\n", $stanza);
       $title = ezproxy_stanza_get_title($stanza);
+      if (!$title) {
+        $title = $oclc_stanza_dir;
+      }
+
       $node = Node::create([
         'title' => $title,
         'type' => 'resource',
@@ -215,7 +219,6 @@ function ezproxy_stanza_form_node_resource_edit_form_alter(&$form, FormStateInte
         ]
       ];
       $link = Link::fromTextandUrl(t("View OCLC's stanza"), Url::fromUri($oclc_url, $options))->toString();
-      drupal_set_message($link);
     }
   }
 
@@ -254,14 +257,11 @@ function ezproxy_stanza_get_title($stanza) {
       break;
     }
   }
-  if (!$title) {
-    $title = ucfirst($stanza_dir);
+  if ($title) {
+    $updated_date_pos = strpos($title, ' (updated');
+    if ($updated_date_pos) {
+      $title = substr($title, 0, $updated_date_pos);
+    }
   }
-
-  $updated_date_pos = strpos($title, ' (updated');
-  if ($updated_date_pos) {
-    $title = substr($title, 0, $updated_date_pos);
-  }
-
   return $title;
 }
