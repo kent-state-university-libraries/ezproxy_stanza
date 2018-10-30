@@ -5,11 +5,11 @@ type: module
 configure: ezproxy_stanza.settings
 core: 8.x
 dependencies:
-  - field
-  - link
-  - menu_ui
-  - node
-  - text
-  - user
-  - views
-  - weight
+  - drupal:field
+  - drupal:link
+  - drupal:menu_ui
+  - drupal:node
+  - drupal:text
+  - drupal:user
+  - drupal:views
+  - weight:weight
